@@ -28,13 +28,16 @@ def build_faiss_index(targets):
         faiss.IndexFlatL2: A FAISS index.
         np.ndarray: Embeddings of the target strings.
     """
+    if not targets:
+        return None, np.array([])  # Handle empty targets
+
     embeddings = model.encode(targets)
     dimension = embeddings.shape[1]
     index = faiss.IndexFlatL2(dimension)
     index.add(embeddings)
     return index, embeddings
 
-def ann_search(query, index, targets, k=5):
+def ann_search(query, index, targets, k=5, distance_threshold=1.0):
     """
     Perform approximate nearest neighbor search using FAISS.
 
@@ -43,14 +46,18 @@ def ann_search(query, index, targets, k=5):
         index (faiss.IndexFlatL2): The FAISS index.
         targets (list): List of target strings.
         k (int): The number of nearest neighbors to return.
+        distance_threshold (float): Maximum allowed distance for a match.
 
     Returns:
         list: List of tuples (matched string, distance).
     """
+    if index is None:  # Handle empty targets
+        return []
+
     query_embedding = model.encode([query])
     distances, indices = index.search(query_embedding, k)
     results = []
     for i, distance in zip(indices[0], distances[0]):
-        if i != -1:  # FAISS returns -1 for invalid indices
+        if i != -1 and distance <= distance_threshold:  # Filter by distance threshold
             results.append((targets[i], distance))
     return results

@@ -6,7 +6,7 @@ which uses bitwise operations to optimize performance.
 
 References:
 - Myers, G. (1999). "A fast bit-vector algorithm for approximate string matching based on dynamic programming".
-  Journal of the ACM, 46(3), 395–415.
+  Journal of the ACM, 46(3), 395-415.
 """
 
 def bit_parallel_levenshtein(str1, str2):

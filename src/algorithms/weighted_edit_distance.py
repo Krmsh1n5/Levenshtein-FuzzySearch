@@ -6,7 +6,7 @@ which assigns different costs to insertions, deletions, substitutions, and trans
 
 References:
 - Wagner, R. A., & Fischer, M. J. (1974). "The string-to-string correction problem".
-  Journal of the ACM, 21(1), 168–173.
+  Journal of the ACM, 21(1), 168-173.
 """
 
 def weighted_edit_distance(str1, str2, weights):

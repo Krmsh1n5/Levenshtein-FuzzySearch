@@ -10,10 +10,7 @@ References:
 - Philips, L. (1990). "Hanging on the Metaphone". Computer Language, 7(12), 39-44.
 """
 
-import fuzzy
-soundex = fuzzy.Soundex(4) 
-metaphone = fuzzy.DMetaphone()
-
+from jellyfish import soundex, metaphone
 
 def phonetic_similarity(str1, str2):
     """

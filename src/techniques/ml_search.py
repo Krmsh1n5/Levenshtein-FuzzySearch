@@ -13,26 +13,29 @@ References:
 
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+import jellyfish
 
 # Load a pre-trained sentence embedding model
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model = SentenceTransformer('all-mpnet-base-v2')  # More robust model
+
+def preprocess(text):
+    """
+    Preprocess the input text by lowercasing and removing special characters.
+    """
+    return text.lower().strip()
 
 def semantic_similarity(str1, str2):
     """
     Compute the semantic similarity between two strings using sentence embeddings.
-
-    Args:
-        str1 (str): The first string.
-        str2 (str): The second string.
-
-    Returns:
-        float: The cosine similarity score between -1 and 1.
     """
+    # Preprocess the input strings
+    str1 = preprocess(str1)
+    str2 = preprocess(str2)
+
     embeddings = model.encode([str1, str2])
     return cosine_similarity([embeddings[0]], [embeddings[1]])[0][0]
 
-
-def ml_fuzzy_search(query, targets, threshold=0.7):
+def ml_fuzzy_search(query, targets, threshold=0.4):  # Lowered threshold
     """
     Perform fuzzy search using machine learning-based semantic similarity.
 
@@ -51,3 +54,23 @@ def ml_fuzzy_search(query, targets, threshold=0.7):
             matches.append((target, similarity))
     matches.sort(key=lambda x: x[1], reverse=True)
     return matches
+
+def hybrid_fuzzy_search(query, targets, ml_threshold=0.4, edit_threshold=2):
+    """
+    Perform fuzzy search using a hybrid approach (ML-based + edit distance).
+    """
+    matches = []
+    for target in targets:
+        # Compute ML-based similarity
+        ml_similarity = semantic_similarity(query, target)
+        
+        # Compute edit distance
+        edit_distance = jellyfish.levenshtein_distance(query, target)
+        
+        # Match if either condition is met
+        if ml_similarity >= ml_threshold or edit_distance <= edit_threshold:
+            matches.append((target, ml_similarity, edit_distance))
+    
+    # Sort by ML similarity (higher is better) and edit distance (lower is better)
+    matches.sort(key=lambda x: (-x[1], x[2]))
+    return [match[0] for match in matches]
