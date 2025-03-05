@@ -12,9 +12,9 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/optimizations')))
 
-from bk_tree import BKTree
-from parallel_processing import parallel_fuzzy_search
-from ann_search import build_faiss_index, ann_search
+from optimizations.bk_tree import BKTree
+from optimizations.parallel_processing import parallel_fuzzy_search
+from optimizations.ann_search import build_faiss_index, ann_search
 
 # Add the path to the src/algorithms directory for levenshtein_distance
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/algorithms')))

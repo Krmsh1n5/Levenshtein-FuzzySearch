@@ -9,9 +9,6 @@ References:
   Communications of the ACM, 16(4), 230-236.
 - Wikipedia: BK-tree. https://en.wikipedia.org/wiki/BK-tree
 """
-
-from Levenshtein import distance as levenshtein_distance
-
 class BKTree:
     """
     A BK-tree data structure for efficient fuzzy search.

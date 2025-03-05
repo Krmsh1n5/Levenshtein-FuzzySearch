@@ -13,7 +13,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/algorithms')))
 
 # Import the function directly from the file
-from damerau_levenshtein import damerau_levenshtein_distance
+from algorithms.damerau_levenshtein import damerau_levenshtein_distance
 
 class TestDamerauLevenshteinDistance(unittest.TestCase):
     # Basic Tests

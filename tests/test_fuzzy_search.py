@@ -13,9 +13,9 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/techniques')))
 
 # Import the functions directly from the files
-from ngram_search import ngram_fuzzy_search
-from phonetic_search import phonetic_fuzzy_search
-from ml_search import ml_fuzzy_search, hybrid_fuzzy_search
+from techniques.ngram_search import ngram_fuzzy_search
+from techniques.phonetic_search import phonetic_fuzzy_search
+from techniques.ml_search import ml_fuzzy_search, hybrid_fuzzy_search
 
 class TestFuzzySearch(unittest.TestCase):
     # N-Gram Fuzzy Search Tests
