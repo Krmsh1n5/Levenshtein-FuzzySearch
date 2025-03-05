@@ -22,6 +22,7 @@ def levenshtein_distance(str1, str2):
     Returns:
         int: The Levenshtein distance between str1 and str2.
     """
+
     if len(str1) < len(str2):
         return levenshtein_distance(str2, str1)
 
