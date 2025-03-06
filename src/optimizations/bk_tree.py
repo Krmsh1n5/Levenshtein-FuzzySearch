@@ -10,24 +10,23 @@ References:
 - Wikipedia: BK-tree. https://en.wikipedia.org/wiki/BK-tree
 """
 class BKTree:
-    """
-    A BK-tree data structure for efficient fuzzy search.
-    """
-
-    def __init__(self, distance_func):
+    def __init__(self, words, distance_func):
         """
-        Initialize the BK-tree with a distance function.
-
+        Initialize the BK-tree with a list of words and a distance function.
+        
         Args:
+            words (list): A list of words to insert into the tree.
             distance_func (callable): A function that computes the distance between two strings.
         """
         self.root = None
         self.distance_func = distance_func
+        for word in words:
+            self.insert(word)
 
     def insert(self, word):
         """
         Insert a word into the BK-tree.
-
+        
         Args:
             word (str): The word to insert.
         """
@@ -50,7 +49,7 @@ class BKTree:
     def search(self, query, max_distance):
         """
         Search for words within a given maximum distance from the query.
-
+        
         Args:
             query (str): The query string.
             max_distance (int): The maximum allowed distance.
@@ -68,7 +67,8 @@ class BKTree:
             distance = self.distance_func(current_word, query)
             if distance <= max_distance:
                 results.append((current_word, distance))
-            for d in range(distance - max_distance, distance + max_distance + 1):
-                if d in children:
-                    stack.append(children[d])
-        return results
+            # Search only existing children
+            for d, child in children.items():
+                if abs(d - distance) <= max_distance:
+                    stack.append(child)
+        return sorted(results, key=lambda x: x[1])  # Sort by closest match

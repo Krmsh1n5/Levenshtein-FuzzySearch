@@ -11,67 +11,53 @@ References:
 """
 
 from multiprocessing import Pool, cpu_count
-from Levenshtein import distance as levenshtein_distance
+from functools import partial
+from itertools import islice
+import time
+from rapidfuzz.distance import Levenshtein  # Faster than python-Levenshtein
 
-def search_target(query, target, threshold):
+def chunker(iterable, chunk_size):
+    """Memory-efficient chunking for large datasets"""
+    iterator = iter(iterable)
+    while chunk := list(islice(iterator, chunk_size)):
+        yield chunk
+
+def search_worker(query, threshold, target):
+    """Optimized search worker with pre-bound parameters"""
+    distance = Levenshtein.distance(query, target)
+    return (target, distance) if distance <= threshold else None
+
+def parallel_fuzzy_search(query, targets, max_distance=2, min_parallel_size=5000, n_jobs=None):
     """
-    Helper function to compute the Levenshtein distance and check if it's within the threshold.
-
+    Hybrid parallel/linear search with automatic mode switching
+    
     Args:
-        query (str): The search query.
-        target (str): The target string.
-        threshold (int): The maximum allowed Levenshtein distance.
-
-    Returns:
-        tuple: (target, distance) if the distance is within the threshold, otherwise None.
+        query: Search string
+        targets: List of target strings
+        max_distance: Maximum allowed Levenshtein distance
+        min_parallel_size: Minimum dataset size to trigger parallel mode
+        n_jobs: Number of parallel workers (None = auto-detect)
     """
-    distance = levenshtein_distance(query, target)
-    if distance <= threshold:
-        return (target, distance)
-    return None
-
-def process_chunk(query, chunk, threshold):
-    """
-    Process a chunk of targets in parallel.
-
-    Args:
-        query (str): The search query.
-        chunk (list): A chunk of target strings.
-        threshold (int): The maximum allowed Levenshtein distance.
-
-    Returns:
-        list: List of tuples (matched string, distance).
-    """
-    return [search_target(query, target, threshold) for target in chunk]
-
-def parallel_fuzzy_search(query, targets, threshold=3, n_jobs=None):
-    """
-    Perform fuzzy search in parallel using multiple CPU cores.
-
-    Args:
-        query (str): The search query.
-        targets (list): List of target strings to search in.
-        threshold (int): The maximum allowed Levenshtein distance.
-        n_jobs (int): The number of CPU cores to use (default: all available cores).
-
-    Returns:
-        list: List of tuples (matched string, distance).
-    """
-    # Use all available cores if n_jobs is None
-    if n_jobs is None:
-        n_jobs = cpu_count()
-
-    # Split targets into chunks to reduce overhead
-    chunk_size = max(1, len(targets) // (n_jobs * 4))  # Adjust chunk size based on number of jobs
-    chunks = [targets[i:i + chunk_size] for i in range(0, len(targets), chunk_size)]
-
-    # Use multiprocessing.Pool for parallel processing
-    with Pool(processes=n_jobs) as pool:
-        results = pool.starmap(
-            process_chunk,
-            [(query, chunk, threshold) for chunk in chunks]
+    # Fallback to linear search for small datasets
+    if len(targets) < min_parallel_size:
+        return sorted(
+            ((t, Levenshtein.distance(query, t)) for t in targets if Levenshtein.distance(query, t) <= max_distance),
+            key=lambda x: (x[1], x[0])
         )
 
-    # Flatten the results and filter out None values
-    matches = [result for chunk_results in results for result in chunk_results if result is not None]
-    return matches
+    # Configure parallel execution
+    n_jobs = n_jobs or cpu_count()
+    worker = partial(search_worker, query, max_distance)
+    
+    # Optimized chunk size calculation
+    chunk_size = max(1000, len(targets) // (n_jobs * 4))
+    
+    with Pool(n_jobs) as pool:
+        results = []
+        # Process in chunks to balance load and memory usage
+        for chunk in chunker(targets, chunk_size):
+            chunk_results = pool.map(worker, chunk)
+            results.extend(r for r in chunk_results if r is not None)
+
+    # Final sorting and deduplication
+    return sorted(results, key=lambda x: (x[1], x[0]))

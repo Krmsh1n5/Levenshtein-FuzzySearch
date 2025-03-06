@@ -11,47 +11,66 @@ References:
 """
 
 from jellyfish import soundex, metaphone
+from dataclasses import dataclass
 
-def phonetic_similarity(str1, str2):
-    """
-    Compute the phonetic similarity between two strings using Soundex and Metaphone.
+@dataclass
+class PhoneticConfig:
+    soundex_weight: float = 0.6  
+    metaphone_weight: float = 0.4  
+    min_score: float = 0.3 
+    normalize: bool = True
+    metaphone_length: int = 4 
 
-    Args:
-        str1 (str): The first string.
-        str2 (str): The second string.
+class PhoneticSearch:
+    def __init__(self, targets, config=PhoneticConfig()):
+        self.config = config
+        self.targets = self._preprocess_targets(targets)
+        
+    def _preprocess(self, s):
+        return s.lower().replace("-", " ").strip() if self.config.normalize else s
 
-    Returns:
-        bool: True if the strings are phonetically similar, False otherwise.
-    """
-    soundex_match = soundex(str1) == soundex(str2)
+    def _preprocess_targets(self, targets):
+        preprocessed = []
+        for target in targets:
+            processed = self._preprocess(target)
+            preprocessed.append({
+                'original': target,
+                'soundex': soundex(processed),
+                'metaphone': metaphone(processed)[:self.config.metaphone_length]
+            })
+        return preprocessed
 
-    # Compare Metaphone codes (both primary and secondary)
-    metaphone_codes1 = metaphone(str1)
-    metaphone_codes2 = metaphone(str2)
-    metaphone_match = (
-        metaphone_codes1[0] == metaphone_codes2[0] or  # Primary codes match
-        metaphone_codes1[0] == metaphone_codes2[1] or  # Primary matches secondary
-        metaphone_codes1[1] == metaphone_codes2[0] or  # Secondary matches primary
-        metaphone_codes1[1] == metaphone_codes2[1]     # Secondary codes match
-    )
+    def _calculate_score(self, query_codes, target):
+        score = 0.0
+        
+        # Soundex match
+        if query_codes['soundex'] == target['soundex']:
+            score += self.config.soundex_weight
+            
+        # Metaphone partial match
+        q_meta = query_codes['metaphone']
+        t_meta = target['metaphone']
+        
+        # Check prefix matching
+        min_length = min(len(q_meta), len(t_meta))
+        match_count = sum(1 for i in range(min_length) if q_meta[i] == t_meta[i])
+        
+        if min_length > 0:
+            score += self.config.metaphone_weight * (match_count / min_length)
+            
+        return min(score, 1.0)
 
-    # Return True if either Soundex or Metaphone codes match
-    return soundex_match or metaphone_match
-
-
-def phonetic_fuzzy_search(query, targets):
-    """
-    Perform fuzzy search using phonetic algorithms.
-
-    Args:
-        query (str): The search query.
-        targets (list): List of target strings to search in.
-
-    Returns:
-        list: List of matched strings.
-    """
-    matches = []
-    for target in targets:
-        if phonetic_similarity(query, target):
-            matches.append(target)
-    return matches
+    def search(self, query, top_k=5):
+        processed_query = self._preprocess(query)
+        query_codes = {
+            'soundex': soundex(processed_query),
+            'metaphone': metaphone(processed_query)  # Removed max_length
+        }
+        
+        scored_matches = []
+        for target in self.targets:
+            score = self._calculate_score(query_codes, target)
+            if score >= self.config.min_score:
+                scored_matches.append((target['original'], score))
+                
+        return sorted(scored_matches, key=lambda x: (-x[1], x[0]))[:top_k]
