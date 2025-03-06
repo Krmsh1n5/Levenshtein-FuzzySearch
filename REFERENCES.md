@@ -58,8 +58,3 @@
 
 - **Joblib Documentation**  
   [https://joblib.readthedocs.io/](https://joblib.readthedocs.io/)
-
----
-
-*For academic use, please cite papers according to your preferred citation style (APA/ACM/IEEE).*  
-*Documentation links should be referenced as "Online Resource" in formal publications.*
