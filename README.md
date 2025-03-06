@@ -45,3 +45,24 @@ This repository is a comprehensive research platform dedicated to exploring the 
 The repository is designed to bridge theoretical research with practical applications. By leveraging the real-world data from Geofabrik, the platform demonstrates:
 - **Robust Matching:** How different edit distance algorithms and fuzzy matching techniques can be applied to imperfect data.
 - **Performance Optimization:** A detailed look into how BK Trees, and parallel processing can significantly reduce the computational cost, especially when dealing with large datasets.
+
+## Tourism Location Fuzzy Search System
+
+A hybrid fuzzy search system designed to handle common tourist misspellings of geographical locations, combining multiple string matching algorithms for robust performance.
+
+**Key Algorithm Docs:** [BK-Tree](src/algorithms/) | [Phonetic Search](src/techniques/)
+
+### Features
+
+**Hybrid Search Engine**  
+Combines three matching strategies:
+- **Levenshtein Distance (BK-Tree)** - Precise typo detection
+- **Phonetic Algorithms** - Sound-alike matching
+- **N-Gram Similarity** - Partial match handling
+
+**Real-World Validation**  
+Tested against common tourism misspellings:
+```python
+"Punta Blanka" → "Punta Blanca"  
+"Saint Gorge" → "Saint George's Anglican Church"  
+"La Havana" → "La Habana"
