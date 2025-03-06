@@ -10,7 +10,7 @@ import sys
 import os
 
 # Add the path to the src/algorithms directory
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/algorithms')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '/home/krmsh1n5/Desktop/Python/Projects/Levenshtein-FuzzySearch/src/')))
 
 # Import the function directly from the file
 from algorithms.damerau_levenshtein import damerau_levenshtein_distance

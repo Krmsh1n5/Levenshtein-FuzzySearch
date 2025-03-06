@@ -7,7 +7,7 @@ which extends the Levenshtein distance by including transpositions (swaps of adj
 References:
 - Damerau, F. J. (1964). "A technique for computer detection and correction of spelling errors".
   Communications of the ACM, 7(3), 171-176.
-- Wikipedia: Damerau-Levenshtein distance. https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance
+- Wikipedia: Damerau-Levenshtein distance. https://en.wikipedia.org/wiki/Damerau-Levenshtein_distance
 """
 
 def damerau_levenshtein_distance(str1, str2):

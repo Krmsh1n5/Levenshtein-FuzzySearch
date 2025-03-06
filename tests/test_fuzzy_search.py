@@ -10,7 +10,7 @@ import sys
 import os
 
 # Add the path to the src/techniques directory
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/techniques')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '/home/krmsh1n5/Desktop/Python/Projects/Levenshtein-FuzzySearch/src/')))
 
 # Import the functions directly from the files
 from techniques.ngram_search import ngram_fuzzy_search
