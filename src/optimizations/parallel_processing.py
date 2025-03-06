@@ -13,7 +13,6 @@ References:
 from multiprocessing import Pool, cpu_count
 from functools import partial
 from itertools import islice
-import time
 from rapidfuzz.distance import Levenshtein  # Faster than python-Levenshtein
 
 def chunker(iterable, chunk_size):
